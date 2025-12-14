@@ -51,17 +51,17 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div className="space-y-6 z-10">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-xs font-medium text-muted-foreground">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
                 New released
               </div>
 
               <h1 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight">
                 Get your new Gadget
                 <br />
-                <span className="text-stone-400">Easy Life Style</span>
+                <span className="text-muted-foreground">Easy Life Style</span>
               </h1>
 
-              <p className="text-lg text-stone-500 max-w-lg">
+              <p className="text-lg text-muted-foreground max-w-lg">
                 Functional coffee and tea infusions powered by traditional Chinese adaptogens. Energy without the jitters, sleep without the grogginess.
               </p>
 
@@ -74,7 +74,7 @@ export default function HomePage() {
                 </a>
               </div>
 
-              <div className="flex items-center gap-6 pt-6 text-stone-400 text-sm">
+              <div className="flex items-center gap-6 pt-6 text-muted-foreground text-sm">
                 <div className="flex items-center gap-2">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 2v20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   <span>100% Organic</span>
@@ -127,10 +127,10 @@ export default function HomePage() {
               <p className="text-muted-foreground max-w-lg">Designed to support your body's natural circadian rhythm from sunrise to recovery.</p>
             </div>
             <div className="flex gap-2">
-              <button className="p-2 rounded-full border border-border hover:bg-muted transition-colors text-muted-foreground">
+              <button className="p-2 rounded-full border border-border hover:bg-accent transition-colors text-foreground">
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
-              <button className="p-2 rounded-full border border-border hover:bg-muted transition-colors text-muted-foreground">
+              <button className="p-2 rounded-full border border-border hover:bg-accent transition-colors text-foreground">
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
             </div>
@@ -142,10 +142,10 @@ export default function HomePage() {
                 <div className="aspect-[4/5] w-full bg-card rounded-2xl relative overflow-hidden mb-6 shadow-sm border border-border">
                   <div className="absolute inset-0 flex items-center justify-center p-8">
                     <div className="w-3/4 h-3/4 bg-card rounded-xl shadow-lg border border-border flex flex-col items-center justify-center gap-4 relative">
-                      <div className="absolute top-4 right-4 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded uppercase tracking-wide">
+                      <div className="absolute top-4 right-4 text-xs font-bold text-accent bg-accent/10 px-2 py-0.5 rounded uppercase tracking-wide">
                         {p.id === 1 ? "AM" : p.id === 2 ? "PM" : "SOS"}
                       </div>
-                      <div className={`w-16 h-16 rounded-full mb-2 flex items-center justify-center ${p.id === 2 ? "bg-accent/30 text-accent" : p.id === 3 ? "bg-secondary/30 text-secondary" : "bg-primary text-primary-foreground"}`}>
+                      <div className={`w-16 h-16 rounded-full mb-2 flex items-center justify-center ${p.id === 2 ? "bg-secondary/30 text-secondary-foreground" : p.id === 3 ? "bg-accent/30 text-accent-foreground" : "bg-primary text-primary-foreground"}`}>
                         <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
                       </div>
                       <div className="text-center">
@@ -184,8 +184,8 @@ export default function HomePage() {
 
                 <ul className="space-y-4">
                   <li className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-stone-700" viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="currentColor" strokeWidth="1.5"/></svg>
+                    <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center">
+                      <svg className="w-5 h-5 text-foreground" viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="currentColor" strokeWidth="1.5"/></svg>
                     </div>
                     <div>
                       <h4 className="text-foreground font-medium">Yin-Yang Balance</h4>
@@ -193,8 +193,8 @@ export default function HomePage() {
                     </div>
                   </li>
                   <li className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-stone-700" viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="currentColor" strokeWidth="1.5"/></svg>
+                    <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center">
+                      <svg className="w-5 h-5 text-foreground" viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="currentColor" strokeWidth="1.5"/></svg>
                     </div>
                     <div>
                       <h4 className="text-foreground font-medium">Adaptogenic Power</h4>
@@ -240,7 +240,7 @@ export default function HomePage() {
                 <div className="space-y-4 pt-4">
                   <div>
                     <div className="flex justify-between text-sm">
-                      <span>Ginseng Coffee</span>
+                      <span className="opacity-80">Ginseng Coffee</span>
                       <span className="font-mono">10 shots</span>
                     </div>
                     <div className="h-2 bg-primary-foreground/20 rounded-full relative overflow-hidden">
@@ -250,7 +250,7 @@ export default function HomePage() {
 
                   <div>
                     <div className="flex justify-between text-sm">
-                      <span>Sleep-Well Tea</span>
+                      <span className="opacity-80">Sleep-Well Tea</span>
                       <span className="font-mono">10 packs</span>
                     </div>
                     <div className="h-2 bg-primary-foreground/20 rounded-full relative overflow-hidden">
