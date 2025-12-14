@@ -10,3 +10,4 @@ export const db = drizzle(process.env.DATABASE_URL || "");
 
 export * from "./schema/auth";
 export * from "./schema/ecommerce";
+export * from "./schema/settings";

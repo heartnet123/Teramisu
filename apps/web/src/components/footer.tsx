@@ -8,9 +8,9 @@ export default function Footer() {
         <div>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-6 h-6 bg-stone-900 dark:bg-white text-white dark:text-stone-900 flex items-center justify-center rounded text-xs font-bold">
-              E
+              T
             </div>
-            <span className="font-light">Essence</span>
+            <span className="font-light">Teramisu</span>
           </div>
           <p className="text-xs text-muted-foreground font-light">
             Carefully curated essentials for the discerning taste.
@@ -103,7 +103,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-stone-200/50 dark:border-stone-800/50 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p className="text-xs text-muted-foreground font-light">© 2025 Essence. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground font-light">© 2025 Teramisu. All rights reserved.</p>
         <div className="flex gap-6">
           <Link
             href="/privacy"

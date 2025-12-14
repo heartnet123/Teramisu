@@ -28,8 +28,8 @@ export default function Navbar() {
           {/* Left: Brand + primary nav */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary text-primary-foreground flex items-center justify-center rounded text-sm font-bold">E</div>
-              <span className="hidden sm:inline font-light">Essence</span>
+              <div className="w-8 h-8 bg-primary text-primary-foreground flex items-center justify-center rounded text-sm font-bold">T</div>
+              <span className="hidden sm:inline font-light">Teramisu</span>
             </Link>
 
             <nav className="hidden md:flex gap-4 text-sm">

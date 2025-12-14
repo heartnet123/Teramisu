@@ -58,7 +58,7 @@ export default function HomePage() {
               <h1 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight">
                 Get your new Gadget
                 <br />
-                <span className="text-muted-foreground">Easy Life Style</span>
+                <span className="text-muted-foreground">Chill Life Style</span>
               </h1>
 
               <p className="text-lg text-muted-foreground max-w-lg">

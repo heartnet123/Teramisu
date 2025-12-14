@@ -9,7 +9,7 @@ import Providers from "../components/providers";
 import Header from "../components/header";
 
 export const metadata: Metadata = {
-  title: "Essence | Minimalist E-commerce",
+  title: "Teramisu | Minimalist E-commerce",
   description: "Premium products, elegant design, curated collections",
   generator: "v0.app",
   icons: {

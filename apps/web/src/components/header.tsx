@@ -27,7 +27,7 @@ export default function Header() {
               <a
                 key={l.to}
                 href={l.to}
-                className={`tab animate-fade-in`}
+                className={`tab`}
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 {l.label}

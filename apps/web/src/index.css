@@ -20,7 +20,7 @@
   --base-font-size: 14px;
 
   /* Color tokens (eco-wellness palette) */
-  --background: #edf2e6;
+  --background: #f8ffef;
   --foreground: #5A7863;
   --card: #FFFFFF;
   --card-foreground: #5A7863;
@@ -343,5 +343,33 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee {
     animation: none;
+  }
+}
+
+/* Gamified loading animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
