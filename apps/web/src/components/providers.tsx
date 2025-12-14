@@ -3,6 +3,8 @@
 import { ThemeProvider } from "./theme-provider";
 import { Toaster } from "./ui/sonner";
 
+import { StoreProvider } from "../service/store";
+
 export default function Providers({ children }: { children: React.ReactNode }) {
 	return (
 		<ThemeProvider
@@ -11,8 +13,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 			enableSystem
 			disableTransitionOnChange
 		>
-			{children}
-			<Toaster richColors />
+			<StoreProvider>
+				{children}
+				<Toaster richColors />
+			</StoreProvider>
 		</ThemeProvider>
 	);
 }
