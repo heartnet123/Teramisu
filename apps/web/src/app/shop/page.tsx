@@ -103,7 +103,7 @@ function ProductCard({ product }: { product: Product }) {
 
 export default function ShopPage() {
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState("All");
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -133,11 +133,11 @@ export default function ShopPage() {
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     return products.filter((p) => {
-      if (cat !== "All" && p.category.toLowerCase() !== cat.toLowerCase()) return false;
+      if (selectedTags.size > 0 && !selectedTags.has(p.category)) return false;
       if (!term) return true;
       return p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term);
     });
-  }, [q, cat, products]);
+  }, [q, selectedTags, products]);
 
   // Simulate loader when searching
   async function onSearchChange(v: string) {
@@ -145,6 +145,22 @@ export default function ShopPage() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 350));
     setLoading(false);
+  }
+
+  function toggleTag(tag: string) {
+    setSelectedTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) {
+        next.delete(tag);
+      } else {
+        next.add(tag);
+      }
+      return next;
+    });
+  }
+
+  function clearAllTags() {
+    setSelectedTags(new Set());
   }
 
   return (
@@ -173,18 +189,26 @@ export default function ShopPage() {
           </div>
 
           <div className="flex items-center gap-3 overflow-auto">
-            {categories.map((c) => (
+            {categories.slice(1).map((c) => (
               <button
                 key={c}
-                onClick={() => setCat(c)}
-                className={`tab ${c === cat ? "tab-active" : ""}`}
-                aria-pressed={c === cat}
+                onClick={() => toggleTag(c)}
+                className={`tab ${selectedTags.has(c) ? "tab-active" : ""}`}
+                aria-pressed={selectedTags.has(c)}
                 role="tab"
               >
                 {c}
                 <span className="tab-underline" />
               </button>
             ))}
+            {selectedTags.size > 0 && (
+              <button
+                onClick={clearAllTags}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+              >
+                Clear all
+              </button>
+            )}
           </div>
         </div>
 
