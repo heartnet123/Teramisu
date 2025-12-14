@@ -14,12 +14,12 @@ export default function Header() {
   const count = useCartStore((s) => s.itemCount());
 
   return (
-    <header className="fixed top-0 w-full z-50 border-b border-stone-200/50 bg-white/95 dark:bg-stone-900/95">
+    <header className="fixed top-0 w-full z-50 border-b border-border bg-background/95 backdrop-blur">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <a href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-stone-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">T</div>
-            <span className="font-semibold tracking-tighter text-stone-900">Teramisu</span>
+            <div className="w-8 h-8 bg-primary text-primary-foreground flex items-center justify-center rounded-lg text-sm font-bold">T</div>
+            <span className="font-semibold tracking-tighter text-foreground">Teramisu</span>
           </a>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
@@ -47,7 +47,7 @@ export default function Header() {
           <Link href="/cart" aria-label="Cart" title="Cart" className="glass-button p-2 relative">
             <IconCart className="w-5 h-5" />
             {count > 0 ? (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-5 flex items-center justify-center px-1 text-xs bg-amber-500 rounded-full border-2 border-white">
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-5 flex items-center justify-center px-1 text-xs bg-accent text-accent-foreground rounded-full border-2 border-background">
                 {count}
               </span>
             ) : null}

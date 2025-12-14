@@ -22,13 +22,13 @@ export default function Navbar() {
   const { data: session, isPending } = authClient.useSession();
 
   return (
-    <header className="border-b border-stone-200/50 dark:border-stone-800/50">
+    <header className="border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between gap-4">
           {/* Left: Brand + primary nav */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-stone-900 dark:bg-white text-white dark:text-stone-900 flex items-center justify-center rounded text-sm font-bold">E</div>
+              <div className="w-8 h-8 bg-primary text-primary-foreground flex items-center justify-center rounded text-sm font-bold">E</div>
               <span className="hidden sm:inline font-light">Essence</span>
             </Link>
 
@@ -73,7 +73,7 @@ export default function Navbar() {
                     className="w-9 h-9 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-stone-900 dark:bg-white text-white dark:text-stone-900 flex items-center justify-center text-sm font-medium">
+                  <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
                     {getInitials(session.user.name)}
                   </div>
                 )}
