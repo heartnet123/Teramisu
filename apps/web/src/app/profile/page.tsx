@@ -130,7 +130,7 @@ export default function ProfilePage() {
         </div>
         <div className="text-center md:text-right">
           <div className="text-3xl font-bold text-amber-500">1,240</div>
-          <div className="text-xs text-stone-400 uppercase tracking-wider mt-1">Jing Points</div>
+          <div className="text-xs text-stone-400 uppercase tracking-wider mt-1">Tera Point</div>
         </div>
       </div>
 

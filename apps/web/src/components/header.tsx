@@ -18,8 +18,8 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <a href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-stone-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">J</div>
-            <span className="font-semibold tracking-tighter text-stone-900">JING BREW</span>
+            <div className="w-8 h-8 bg-stone-900 text-white flex items-center justify-center rounded-lg text-sm font-bold">T</div>
+            <span className="font-semibold tracking-tighter text-stone-900">Teramisu</span>
           </a>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
