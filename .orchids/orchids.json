@@ -1,0 +1,7 @@
+{
+  "projectId": "228fb709-6df5-41e5-a6e3-34bab0dd88a2",
+  "createdAt": 1765692979615,
+  "startupCommands": [
+    "cd E:/webappgithub/Teramisu && bun install && bun turbo dev"
+  ]
+}
