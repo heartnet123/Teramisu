@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import IconSearch from "@/components/icons/search";
+import IconFilter from "@/components/icons/filter";
 import Loader from "@/components/loader";
 import { useCartStore } from "@/service/store";
 import { getServerUrl } from "@/lib/server-url";
@@ -104,6 +105,7 @@ function ProductCard({ product }: { product: Product }) {
 export default function ShopPage() {
   const [q, setQ] = useState("");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -172,8 +174,8 @@ export default function ShopPage() {
           <p className="text-sm text-muted-foreground">A curated collection with a minimalist, glassy aesthetic.</p>
         </header>
 
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-          <div className="flex items-center gap-2 w-full md:w-1/2">
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex items-center gap-2 w-full">
             <div className="relative flex-1">
               <Input
                 aria-label="Search products"
@@ -186,30 +188,46 @@ export default function ShopPage() {
                 <IconSearch />
               </div>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2"
+            >
+              <IconFilter className="w-4 h-4" />
+              Filter
+              {selectedTags.size > 0 && (
+                <Badge variant="default" className="ml-1">
+                  {selectedTags.size}
+                </Badge>
+              )}
+            </Button>
           </div>
 
-          <div className="flex items-center gap-3 overflow-auto">
-            {categories.slice(1).map((c) => (
-              <button
-                key={c}
-                onClick={() => toggleTag(c)}
-                className={`tab ${selectedTags.has(c) ? "tab-active" : ""}`}
-                aria-pressed={selectedTags.has(c)}
-                role="tab"
-              >
-                {c}
-                <span className="tab-underline" />
-              </button>
-            ))}
-            {selectedTags.size > 0 && (
-              <button
-                onClick={clearAllTags}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
-              >
-                Clear all
-              </button>
-            )}
-          </div>
+          {showFilters && (
+            <div className="flex items-center gap-3 overflow-auto p-4 rounded-lg border bg-card animate-fade-in">
+              {categories.slice(1).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => toggleTag(c)}
+                  className={`tab ${selectedTags.has(c) ? "tab-active" : ""}`}
+                  aria-pressed={selectedTags.has(c)}
+                  role="tab"
+                >
+                  {c}
+                  <span className="tab-underline" />
+                </button>
+              ))}
+              {selectedTags.size > 0 && (
+                <button
+                  onClick={clearAllTags}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {loadingProducts ? (
