@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { getServerUrl } from "@/lib/server-url";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,7 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch("/api/admin/products", {
+      const res = await fetch(`${getServerUrl()}/api/admin/products`, {
         credentials: "include",
       });
       if (res.ok) {
@@ -48,7 +49,7 @@ export default function AdminProductsPage() {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      const res = await fetch(`/api/admin/products/${id}`, {
+      const res = await fetch(`${getServerUrl()}/api/admin/products/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -234,8 +235,8 @@ function ProductForm({
 
     try {
       const url = product
-        ? `/api/admin/products/${product.id}`
-        : "/api/admin/products";
+        ? `${getServerUrl()}/api/admin/products/${product.id}`
+        : `${getServerUrl()}/api/admin/products`;
       const method = product ? "PATCH" : "POST";
 
       const res = await fetch(url, {

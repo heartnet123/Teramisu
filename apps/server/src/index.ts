@@ -7,7 +7,7 @@ import { eq, desc, sql, and, gte } from "drizzle-orm";
 const app = new Elysia()
 	.use(
 		cors({
-			origin: process.env.CORS_ORIGIN?.split(",") || ["http://localhost:3001"],
+			origin: process.env.CORS_ORIGIN?.split(",") || ["http://localhost:3000", "http://localhost:3001"],
 			credentials: true,
 		}),
 

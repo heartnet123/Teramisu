@@ -85,8 +85,9 @@ export default function ProfilePage() {
 
     try {
       // Attempt request to server - relative path to allow proxying
-      const res = await fetch("/api/user/profile", {
+      const res = await fetch("http://localhost:3000/api/user/profile", {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: localUser.name, image: localUser.image }),
       });
