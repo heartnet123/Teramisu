@@ -1,9 +1,3 @@
-import dotenv from "dotenv";
-
-dotenv.config({
-	path: "../../apps/server/.env",
-});
-
 import { drizzle } from "drizzle-orm/node-postgres";
 
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
@@ -19,7 +13,13 @@ export const schema = {
 
 export type Db = NodePgDatabase<typeof schema>;
 
-export const db: Db = drizzle(process.env.DATABASE_URL || "", { schema });
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+	throw new Error("DATABASE_URL is required");
+}
+
+export const db: Db = drizzle(databaseUrl, { schema });
 
 export * from "./schema/auth";
 export * from "./schema/ecommerce";

@@ -3,21 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Footer from "@/components/footer";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import IconSearch from "@/components/icons/search";
-import IconFilter from "@/components/icons/filter";
-import Loader from "@/components/loader";
-import { useCartStore } from "@/service/store";
 import { getServerUrl } from "@/lib/server-url";
 
 /**
  * Minimal Shop page showcasing the new design tokens, glassy cards and microinteractions.
  * - Client rendered so we can filter/search locally
- * - Uses Card + Button primitives created earlier
+ * - Uses Button primitives created earlier
  */
 
 type Product = {
@@ -31,7 +25,8 @@ type Product = {
   availability: "in" | "low" | "out";
 };
 
-const categories = ["All", "Apparel", "Home", "Accessories", "Bags", "Eyewear", "Electronics", "Stationery"];
+const categories = ["Featured", "Chairs", "Armchairs", "Table lamp", "Ceiling Light", "Decors", "Rugs", "Cushions"];
+type SortKey = "featured" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
 function currency(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
@@ -39,74 +34,27 @@ function currency(n: number) {
 
 /* Small ProductCard inside the page so we avoid creating more files for now */
 function ProductCard({ product }: { product: Product }) {
-  const addItem = useCartStore((s) => s.addItem);
-
-  function onAdd() {
-    if (product.availability === "out" || product.stock <= 0) return;
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      maxQuantity: product.stock,
-      quantity: 1,
-    });
-  }
-
-  const availabilityBadge =
-    product.availability === "out" ? (
-      <Badge variant="destructive">Out of stock</Badge>
-    ) : product.availability === "low" ? (
-      <Badge variant="warning">Low stock</Badge>
-    ) : (
-      <Badge variant="success">In stock</Badge>
-    );
-
   return (
-    <Card className="glass-card animate-fade-in">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-3">
-          <CardTitle className="text-sm font-medium">{product.name}</CardTitle>
-          {availabilityBadge}
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        <div className="w-full h-44 rounded-md overflow-hidden mb-3 bg-muted">
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-        </div>
-        <p className="text-sm text-muted-foreground">{product.description}</p>
-      </CardContent>
-
-      <CardFooter>
-        <div className="flex items-center justify-between w-full gap-4">
-          <div>
-            <div className="text-sm text-muted-foreground">{product.category}</div>
-            <div className="font-semibold">{currency(product.price)}</div>
-          </div>
-          <div className="ml-auto">
-            <div className="flex items-center gap-2">
-              <Link href={`/shop/${product.id}`}>
-                <Button size="sm" variant="outline">
-                  View
-                </Button>
-              </Link>
-              <Button size="sm" onClick={onAdd} disabled={product.availability === "out" || product.stock <= 0}>
-                {product.availability === "out" || product.stock <= 0 ? "Unavailable" : "Add to cart"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardFooter>
-    </Card>
+    <Link href={`/shop/${product.id}`} className="group block space-y-3 animate-fade-in">
+      <div className="aspect-[4/5] rounded-[32px] overflow-hidden bg-[#f3f3f1] relative transition-transform duration-300 group-hover:scale-[1.02]">
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="space-y-1 px-1">
+        <h3 className="font-semibold text-base leading-tight">{product.name}</h3>
+        <p className="text-sm font-medium text-muted-foreground">{currency(product.price)}</p>
+      </div>
+    </Link>
   );
 }
 
 export default function ShopPage() {
   const [q, setQ] = useState("");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const [showFilters, setShowFilters] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState<SortKey>("featured");
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
@@ -134,20 +82,30 @@ export default function ShopPage() {
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    return products.filter((p) => {
+    const matches = products.filter((p) => {
       if (selectedTags.size > 0 && !selectedTags.has(p.category)) return false;
       if (!term) return true;
       return p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term);
     });
-  }, [q, selectedTags, products]);
-
-  // Simulate loader when searching
-  async function onSearchChange(v: string) {
-    setQ(v);
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 350));
-    setLoading(false);
-  }
+    const sorted = [...matches];
+    switch (sortBy) {
+      case "price-asc":
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case "name-asc":
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "name-desc":
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      default:
+        break;
+    }
+    return sorted;
+  }, [q, selectedTags, products, sortBy]);
 
   function toggleTag(tag: string) {
     setSelectedTags((prev) => {
@@ -165,116 +123,125 @@ export default function ShopPage() {
     setSelectedTags(new Set());
   }
 
+  const activeCategory = Array.from(selectedTags)[0] || "Shop";
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
+      <main className="flex-1 w-full max-w-[1400px] mx-auto px-6 py-12">
+        <div className="flex flex-col lg:flex-row gap-12">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 space-y-10 shrink-0">
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold">
+                  Filter <span className="text-muted-foreground font-normal text-sm ml-1">({selectedTags.size})</span>
+                </h2>
+                {selectedTags.size > 0 && (
+                  <button
+                    onClick={clearAllTags}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-10">
-        <header className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-semibold mb-2">Shop</h1>
-          <p className="text-sm text-muted-foreground">A curated collection with a minimalist, glassy aesthetic.</p>
-        </header>
-
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="flex items-center gap-2 w-full">
-            <div className="relative flex-1">
-              <Input
-                aria-label="Search products"
-                placeholder="Search products, collections..."
-                value={q}
-                onChange={(e) => void onSearchChange(e.target.value)}
-                className="pr-10"
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                <IconSearch />
+              <div className="bg-[#f9f9f9] rounded-2xl p-6 space-y-6">
+                {/* Categories */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold flex items-center gap-2">
+                    Categories <span className="text-muted-foreground font-normal text-xs">({selectedTags.size})</span>
+                  </h3>
+                  <div className="flex flex-col gap-3">
+                    {categories.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => toggleTag(c)}
+                        className={`text-left text-sm transition-colors ${selectedTags.has(c)
+                            ? "font-bold text-foreground"
+                            : "text-muted-foreground hover:text-foreground"
+                          }`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2"
-            >
-              <IconFilter className="w-4 h-4" />
-              Filter
-              {selectedTags.size > 0 && (
-                <Badge variant="default" className="ml-1">
-                  {selectedTags.size}
-                </Badge>
-              )}
-            </Button>
-          </div>
+          </aside>
 
-          {showFilters && (
-            <div className="flex items-center gap-3 overflow-auto p-4 rounded-lg border bg-card animate-fade-in">
-              {categories.slice(1).map((c) => (
-                <button
-                  key={c}
-                  onClick={() => toggleTag(c)}
-                  className={`tab ${selectedTags.has(c) ? "tab-active" : ""}`}
-                  aria-pressed={selectedTags.has(c)}
-                  role="tab"
-                >
-                  {c}
-                  <span className="tab-underline" />
-                </button>
-              ))}
-              {selectedTags.size > 0 && (
-                <button
-                  onClick={clearAllTags}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+          {/* Main Content */}
+          <div className="flex-1 space-y-8">
+            <header className="space-y-8">
+              <h1 className="text-6xl font-black tracking-tight">{activeCategory}</h1>
 
-        {loadingProducts ? (
-          <section>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <Card key={i} className="glass-card">
-                  <CardHeader>
-                    <Skeleton className="h-4 w-3/4" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="w-full h-44 mb-3" />
-                    <Skeleton className="h-3 w-full mb-2" />
-                    <Skeleton className="h-3 w-5/6" />
-                  </CardContent>
-                  <CardFooter>
-                    <div className="w-full flex items-center justify-between">
-                      <div className="space-y-2">
-                        <Skeleton className="h-3 w-16" />
-                        <Skeleton className="h-4 w-20" />
-                      </div>
-                      <Skeleton className="h-9 w-24" />
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </section>
-        ) : loading ? (
-          <div className="py-8">
-            <Loader />
-          </div>
-        ) : (
-          <section>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filtered.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
+              <div className="flex items-center justify-between text-sm py-4">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Link href="/shop" className="hover:text-foreground transition-colors">
+                    Shop
+                  </Link>
+                  <span>›</span>
+                  <span className="text-foreground font-medium">{activeCategory}</span>
+                </div>
 
-            {filtered.length === 0 && (
-              <div className="py-12 text-center text-muted-foreground">
-                No products found. Try a different search or category.
+                <div className="text-muted-foreground">
+                  {filtered.length} results
+                </div>
+
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortKey)}>
+                  <SelectTrigger className="h-9 w-[180px] text-sm">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="featured">Featured</SelectItem>
+                    <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                    <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                    <SelectItem value="name-asc">Name: A-Z</SelectItem>
+                    <SelectItem value="name-desc">Name: Z-A</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </header>
+
+            {loadingProducts ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="space-y-4">
+                    <Skeleton className="aspect-[4/5] rounded-[32px]" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-4 w-1/4" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                  {filtered.map((p) => (
+                    <ProductCard key={p.id} product={p} />
+                  ))}
+                </div>
+
+                {filtered.length === 0 && (
+                  <div className="py-24 text-center">
+                    <p className="text-xl font-medium">No results found</p>
+                    <p className="text-muted-foreground mt-2">Try adjusting your filters or search query.</p>
+                    <Button
+                      variant="outline"
+                      className="mt-6"
+                      onClick={() => {
+                        clearAllTags();
+                        setQ("");
+                      }}
+                    >
+                      Reset all filters
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
-          </section>
-        )}
+          </div>
+        </div>
       </main>
 
       <Footer />

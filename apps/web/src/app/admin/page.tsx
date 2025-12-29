@@ -23,6 +23,12 @@ export default async function AdminDashboard() {
   await requireAdmin();
   const metrics = await getDashboardMetrics();
 
+  const avgRecentOrderValue =
+    metrics?.recentOrders && metrics.recentOrders.length > 0
+      ? metrics.recentOrders.reduce((sum: number, o: any) => sum + Number(o.totalAmount || 0), 0) /
+        metrics.recentOrders.length
+      : 0;
+
   const stats = [
     {
       name: "Total Members",
@@ -50,6 +56,20 @@ export default async function AdminDashboard() {
       value: metrics.totalProducts || 0,
       icon: Package,
       change: "2 new",
+      positive: true,
+    },
+    {
+      name: "Avg Order (Recent)",
+      value: `$${avgRecentOrderValue.toFixed(2)}`,
+      icon: TrendingUp,
+      change: metrics.recentOrders && metrics.recentOrders.length > 0 ? `${metrics.recentOrders.length} rec` : "—",
+      positive: true,
+    },
+    {
+      name: "Recent Orders",
+      value: metrics.recentOrders ? metrics.recentOrders.length : 0,
+      icon: ShoppingCart,
+      change: metrics.recentOrders && metrics.recentOrders.length > 0 ? "+vs prev" : "—",
       positive: true,
     },
   ];

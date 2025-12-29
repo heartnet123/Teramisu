@@ -115,3 +115,105 @@ export const orderItemRelations = relations(orderItem, ({ one }) => ({
     references: [product.id],
   }),
 }));
+
+/**
+ * Data dictionary for ecommerce schema
+ * Exported as `ecommerceDataDictionary`
+ *
+ * Tables:
+ * - product
+ *   - id: text PK
+ *   - name: text NOT NULL
+ *   - description: text
+ *   - price: decimal(10,2) NOT NULL
+ *   - category: text
+ *   - stock: integer NOT NULL DEFAULT 0
+ *   - image: text
+ *   - isActive: boolean NOT NULL DEFAULT true
+ *   - createdAt: timestamp NOT NULL DEFAULT now()
+ *   - updatedAt: timestamp NOT NULL DEFAULT now()
+ *
+ * - "order"
+ *   - id: text PK
+ *   - userId: text FK -> user.id NOT NULL
+ *   - status: order_status enum NOT NULL DEFAULT 'pending'
+ *   - shipmentStatus: shipment_status enum
+ *   - totalAmount: decimal(10,2) NOT NULL
+ *   - shippingAddress: text
+ *   - trackingNumber: text
+ *   - notes: text
+ *   - approvedAt: timestamp
+ *   - shippedAt: timestamp
+ *   - deliveredAt: timestamp
+ *   - cancelledAt: timestamp
+ *   - createdAt: timestamp NOT NULL DEFAULT now()
+ *   - updatedAt: timestamp NOT NULL DEFAULT now()
+ *
+ * - order_item
+ *   - id: text PK
+ *   - orderId: text FK -> order.id NOT NULL
+ *   - productId: text FK -> product.id NOT NULL
+ *   - quantity: integer NOT NULL
+ *   - priceAtPurchase: decimal(10,2) NOT NULL
+ *   - createdAt: timestamp NOT NULL DEFAULT now()
+ *
+ * Enums:
+ * - order_status: pending, approved, processing, shipped, delivered, cancelled
+ * - shipment_status: preparing, shipped, in_transit, out_for_delivery, delivered
+ */
+
+export const ecommerceDataDictionary = {
+  product: {
+    id: "text PK",
+    name: "text NOT NULL",
+    description: "text",
+    price: "decimal(10,2) NOT NULL",
+    category: "text",
+    stock: "integer NOT NULL DEFAULT 0",
+    image: "text",
+    isActive: "boolean NOT NULL DEFAULT true",
+    createdAt: "timestamp NOT NULL DEFAULT now()",
+    updatedAt: "timestamp NOT NULL DEFAULT now()",
+  },
+  order: {
+    id: "text PK",
+    userId: "text FK -> user.id NOT NULL",
+    status: "order_status enum NOT NULL DEFAULT 'pending'",
+    shipmentStatus: "shipment_status enum",
+    totalAmount: "decimal(10,2) NOT NULL",
+    shippingAddress: "text",
+    trackingNumber: "text",
+    notes: "text",
+    approvedAt: "timestamp",
+    shippedAt: "timestamp",
+    deliveredAt: "timestamp",
+    cancelledAt: "timestamp",
+    createdAt: "timestamp NOT NULL DEFAULT now()",
+    updatedAt: "timestamp NOT NULL DEFAULT now()",
+  },
+  order_item: {
+    id: "text PK",
+    orderId: "text FK -> order.id NOT NULL",
+    productId: "text FK -> product.id NOT NULL",
+    quantity: "integer NOT NULL",
+    priceAtPurchase: "decimal(10,2) NOT NULL",
+    createdAt: "timestamp NOT NULL DEFAULT now()",
+  },
+  enums: {
+    order_status: [
+      "pending",
+      "approved",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ],
+    shipment_status: [
+      "preparing",
+      "shipped",
+      "in_transit",
+      "out_for_delivery",
+      "delivered",
+    ],
+  },
+};
