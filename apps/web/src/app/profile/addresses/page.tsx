@@ -1,241 +1,441 @@
-'use client';
+"use client";
+
 import React from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getServerUrl } from "@/lib/server-url";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  MapPin,
+  Star,
+  X,
+} from "lucide-react";
+
+const THAI_PROVINCES = [
+  "กรุงเทพมหานคร", "กระบี่", "กาญจนบุรี", "กาฬสินธุ์", "กำแพงเพชร",
+  "ขอนแก่น", "จันทบุรี", "ฉะเชิงเทรา", "ชลบุรี", "ชัยนาท",
+  "ชัยภูมิ", "ชุมพร", "เชียงราย", "เชียงใหม่", "ตรัง",
+  "ตราด", "ตาก", "นครนายก", "นครปฐม", "นครพนม",
+  "นครราชสีมา", "นครศรีธรรมราช", "นครสวรรค์", "นนทบุรี", "นราธิวาส",
+  "น่าน", "บึงกาฬ", "บุรีรัมย์", "ปทุมธานี", "ประจวบคีรีขันธ์",
+  "ปราจีนบุรี", "ปัตตานี", "พระนครศรีอยุธยา", "พังงา", "พัทลุง",
+  "พิจิตร", "พิษณุโลก", "เพชรบุรี", "เพชรบูรณ์", "แพร่",
+  "พะเยา", "ภูเก็ต", "มหาสารคาม", "มุกดาหาร", "แม่ฮ่องสอน",
+  "ยโสธร", "ยะลา", "ร้อยเอ็ด", "ระนอง", "ระยอง",
+  "ราชบุรี", "ลพบุรี", "ลำปาง", "ลำพูน", "เลย",
+  "ศรีสะเกษ", "สกลนคร", "สงขลา", "สตูล", "สมุทรปราการ",
+  "สมุทรสงคราม", "สมุทรสาคร", "สระแก้ว", "สระบุรี", "สิงห์บุรี",
+  "สุโขทัย", "สุพรรณบุรี", "สุราษฎร์ธานี", "สุรินทร์", "หนองคาย",
+  "หนองบัวลำภู", "อ่างทอง", "อุดรธานี", "อุทัยธานี", "อุตรดิตถ์",
+  "อุบลราชธานี", "อำนาจเจริญ"
+];
 
 type Address = {
   id: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  region?: string;
-  postalCode?: string;
-  isDefault?: boolean;
+  label?: string;
+  recipientName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  subdistrict?: string;
+  district: string;
+  province: string;
+  postalCode: string;
+  isDefault: boolean;
+};
+
+type AddressForm = Omit<Address, "id">;
+
+const emptyForm: AddressForm = {
+  label: "",
+  recipientName: "",
+  phone: "",
+  addressLine1: "",
+  addressLine2: "",
+  subdistrict: "",
+  district: "",
+  province: "",
+  postalCode: "",
+  isDefault: false,
 };
 
 export default function AddressesPage() {
   const router = useRouter();
-  const { data: session, isPending } = authClient.useSession();
-  const user = session?.user;
-
+  const { data: session, isPending: sessionLoading } = authClient.useSession();
   const [addresses, setAddresses] = React.useState<Address[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-
-  const emptyForm: Omit<Address, "id" | "isDefault"> = {
-    line1: "",
-    line2: "",
-    city: "",
-    region: "",
-    postalCode: "",
-  };
-
-  const [form, setForm] = React.useState<Omit<Address, "id" | "isDefault">>(emptyForm);
-  const [editingId, setEditingId] = React.useState<string | null>(null);
-  const [saving, setSaving] = React.useState(false);
+  const [isFormOpen, setIsFormOpen] = React.useState(false);
+  const [editingAddress, setEditingAddress] = React.useState<Address | null>(null);
+  const [form, setForm] = React.useState<AddressForm>(emptyForm);
+  const [submitting, setSubmitting] = React.useState(false);
 
   React.useEffect(() => {
-    if (!isPending && !user) {
+    if (!sessionLoading && !session?.user) {
       router.push("/login");
       return;
     }
-    // load addresses
-    (async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/user/addresses");
-        if (!res.ok) throw new Error("Failed to load addresses");
+
+    if (session?.user) {
+      fetchAddresses();
+    }
+  }, [session, sessionLoading, router]);
+
+  const fetchAddresses = async () => {
+    try {
+      const res = await fetch(`${getServerUrl()}/api/user/addresses`, {
+        credentials: "include",
+      });
+
+      if (res.ok) {
         const data = await res.json();
-        setAddresses(data || []);
-      } catch (err: any) {
-        setError(err?.message || "Failed to load addresses");
-      } finally {
-        setLoading(false);
+        setAddresses(data);
       }
-    })();
-  }, [isPending, user, router]);
-
-  const validate = (payload: Partial<Address>) => {
-    if (!payload.line1 || payload.line1.trim().length < 3) return "Address line 1 must be at least 3 characters.";
-    if (!payload.city || payload.city.trim().length < 2) return "City is required.";
-    if (payload.postalCode && payload.postalCode.trim().length < 3) return "Postal code looks too short.";
-    return null;
-  };
-
-  // Create or update (optimistic)
-  const onSave = async () => {
-    setError(null);
-    const payload = {
-      line1: form.line1.trim(),
-      line2: form.line2?.trim(),
-      city: form.city.trim(),
-      region: form.region?.trim(),
-      postalCode: form.postalCode?.trim(),
-    };
-    const v = validate(payload as Address);
-    if (v) {
-      setError(v);
-      return;
-    }
-
-    setSaving(true);
-
-    if (editingId) {
-      // optimistic update: replace in local list
-      const prev = addresses;
-      const updated = addresses.map(a => (a.id === editingId ? { ...a, ...payload } as Address : a));
-      setAddresses(updated);
-
-      try {
-        const res = await fetch(`/api/user/addresses/${editingId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) {
-          throw new Error((await res.json().catch(() => ({}))).message || "Failed to update address");
-        }
-        setEditingId(null);
-        setForm(emptyForm);
-      } catch (err: any) {
-        setAddresses(prev); // rollback
-        setError(err?.message || "Update failed, changes rolled back.");
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      // create optimistic
-      const tempId = "temp-" + Math.random().toString(36).slice(2, 9);
-      const newAddress: Address = { id: tempId, ...payload, isDefault: addresses.length === 0 };
-      const prev = addresses;
-      setAddresses([newAddress, ...addresses]);
-      setForm(emptyForm);
-
-      try {
-        const res = await fetch("/api/user/addresses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || "Failed to create address");
-        const created: Address = await res.json();
-        // replace temp with real
-        setAddresses((cur) => cur.map(a => (a.id === tempId ? created : a)));
-      } catch (err: any) {
-        // rollback remove temp
-        setAddresses(prev);
-        setError(err?.message || "Create failed, changes rolled back.");
-      } finally {
-        setSaving(false);
-      }
+    } catch (error) {
+      console.error("Failed to fetch addresses:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const onEdit = (a: Address) => {
-    setEditingId(a.id);
-    setForm({ line1: a.line1, line2: a.line2 || "", city: a.city, region: a.region || "", postalCode: a.postalCode || "" });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const onCancelEdit = () => {
-    setEditingId(null);
+  const openAddForm = () => {
+    setEditingAddress(null);
     setForm(emptyForm);
-    setError(null);
+    setIsFormOpen(true);
   };
 
-  const onDelete = async (id: string) => {
-    setError(null);
-    const prev = addresses;
-    // optimistic remove
-    setAddresses(addresses.filter(a => a.id !== id));
+  const openEditForm = (address: Address) => {
+    setEditingAddress(address);
+    setForm({
+      label: address.label || "",
+      recipientName: address.recipientName,
+      phone: address.phone,
+      addressLine1: address.addressLine1,
+      addressLine2: address.addressLine2 || "",
+      subdistrict: address.subdistrict || "",
+      district: address.district,
+      province: address.province,
+      postalCode: address.postalCode,
+      isDefault: address.isDefault,
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
 
     try {
-      const res = await fetch(`/api/user/addresses/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || "Failed to delete address");
-    } catch (err: any) {
-      // rollback
-      setAddresses(prev);
-      setError(err?.message || "Delete failed, changes rolled back.");
+      const url = editingAddress
+        ? `${getServerUrl()}/api/user/addresses/${editingAddress.id}`
+        : `${getServerUrl()}/api/user/addresses`;
+      const method = editingAddress ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
+
+      if (res.ok) {
+        toast.success(editingAddress ? "อัปเดตที่อยู่แล้ว" : "เพิ่มที่อยู่แล้ว");
+        setIsFormOpen(false);
+        fetchAddresses();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "เกิดข้อผิดพลาด");
+      }
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาด");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const setDefault = async (id: string) => {
-    setError(null);
-    const prev = addresses;
-    // optimistic local default
-    setAddresses(addresses.map(a => ({ ...a, isDefault: a.id === id })));
+  const handleDelete = async (id: string) => {
+    if (!confirm("ต้องการลบที่อยู่นี้หรือไม่?")) return;
 
     try {
-      const res = await fetch(`/api/user/addresses/${id}/default`, { method: "POST" });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || "Failed to set default");
-    } catch (err: any) {
-      setAddresses(prev);
-      setError(err?.message || "Failed to set default address.");
+      const res = await fetch(`${getServerUrl()}/api/user/addresses/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        toast.success("ลบที่อยู่แล้ว");
+        setAddresses(addresses.filter((a) => a.id !== id));
+      } else {
+        toast.error("ไม่สามารถลบที่อยู่ได้");
+      }
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาด");
     }
   };
 
-  if (isPending) return null;
-  if (!user) return null;
+  const handleSetDefault = async (id: string) => {
+    try {
+      const res = await fetch(`${getServerUrl()}/api/user/addresses/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ isDefault: true }),
+      });
+
+      if (res.ok) {
+        toast.success("ตั้งเป็นที่อยู่หลักแล้ว");
+        fetchAddresses();
+      }
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาด");
+    }
+  };
+
+  if (sessionLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto py-10 space-y-6">
-      <Card className="p-6">
-        <h2 className="text-lg font-medium mb-4">Manage Addresses</h2>
-
-        <div className="space-y-3">
-          <label className="text-sm text-stone-600">Address line 1</label>
-          <Input value={form.line1} onChange={(e) => setForm(s => ({ ...s, line1: e.target.value }))} placeholder="Street, house number" />
-          <label className="text-sm text-stone-600">Address line 2 (optional)</label>
-          <Input value={form.line2} onChange={(e) => setForm(s => ({ ...s, line2: e.target.value }))} placeholder="Apartment, suite, etc." />
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="text-sm text-stone-600">City</label>
-              <Input value={form.city} onChange={(e) => setForm(s => ({ ...s, city: e.target.value }))} />
-            </div>
-            <div>
-              <label className="text-sm text-stone-600">Region</label>
-              <Input value={form.region} onChange={(e) => setForm(s => ({ ...s, region: e.target.value }))} />
-            </div>
-            <div>
-              <label className="text-sm text-stone-600">Postal code</label>
-              <Input value={form.postalCode} onChange={(e) => setForm(s => ({ ...s, postalCode: e.target.value }))} />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 mt-2">
-            <Button onClick={onSave} disabled={saving}>{saving ? (editingId ? "Updating..." : "Saving...") : editingId ? "Update address" : "Add address"}</Button>
-            {editingId ? <Button variant="ghost" onClick={onCancelEdit} disabled={saving}>Cancel</Button> : null}
-            <div className="text-sm text-stone-400 ml-auto" aria-live="polite">{error ? <span className="text-red-600">{error}</span> : <span>Inline validation will show errors here.</span>}</div>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">ที่อยู่ของฉัน</h1>
+          <Button onClick={openAddForm}>
+            <Plus className="w-4 h-4 mr-2" />
+            เพิ่มที่อยู่
+          </Button>
         </div>
-      </Card>
 
-      <div className="grid gap-4">
-        {loading ? (
-          <Card className="p-6">Loading addresses…</Card>
-        ) : addresses.length === 0 ? (
-          <Card className="p-6 text-stone-500">No addresses yet. Add one using the form above.</Card>
+        {addresses.length === 0 ? (
+          <Card className="p-12 text-center">
+            <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-lg font-semibold mb-2">ยังไม่มีที่อยู่</h2>
+            <p className="text-muted-foreground mb-4">เพิ่มที่อยู่สำหรับการจัดส่งสินค้า</p>
+            <Button onClick={openAddForm}>
+              <Plus className="w-4 h-4 mr-2" />
+              เพิ่มที่อยู่ใหม่
+            </Button>
+          </Card>
         ) : (
-          addresses.map(addr => (
-            <Card key={addr.id} className="p-4 flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <div className="font-medium">{addr.line1}</div>
-                  {addr.isDefault ? <Badge variant="secondary">Default</Badge> : null}
+          <div className="space-y-4">
+            {addresses.map((address) => (
+              <Card key={address.id} className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      {address.label && (
+                        <span className="text-sm font-medium text-primary">
+                          {address.label}
+                        </span>
+                      )}
+                      {address.isDefault && (
+                        <span className="px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full flex items-center gap-1">
+                          <Star className="w-3 h-3" />
+                          ที่อยู่หลัก
+                        </span>
+                      )}
+                    </div>
+                    <p className="font-medium">{address.recipientName}</p>
+                    <p className="text-sm text-muted-foreground">{address.phone}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {address.addressLine1}
+                      {address.addressLine2 && `, ${address.addressLine2}`}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {[address.subdistrict, address.district, address.province, address.postalCode]
+                        .filter(Boolean)
+                        .join(" ")}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!address.isDefault && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSetDefault(address.id)}
+                      >
+                        ตั้งเป็นหลัก
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEditForm(address)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDelete(address.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="text-sm text-stone-500">{addr.line2 ? <>{addr.line2}<br/></> : null}{addr.city}{addr.region ? `, ${addr.region}` : ""} {addr.postalCode ? ` ${addr.postalCode}` : ""}</div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Address Form Modal */}
+        {isFormOpen && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold">
+                  {editingAddress ? "แก้ไขที่อยู่" : "เพิ่มที่อยู่ใหม่"}
+                </h2>
+                <Button variant="ghost" size="icon" onClick={() => setIsFormOpen(false)}>
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
-              <div className="flex items-center gap-2">
-                {!addr.isDefault ? <Button size="sm" variant="ghost" onClick={() => setDefault(addr.id)}>Set default</Button> : null}
-                <Button size="sm" variant="secondary" onClick={() => onEdit(addr)}>Edit</Button>
-                <Button size="sm" variant="destructive" onClick={() => onDelete(addr.id)}>Delete</Button>
-              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="label">ป้ายกำกับ (เช่น บ้าน, ที่ทำงาน)</Label>
+                  <Input
+                    id="label"
+                    value={form.label}
+                    onChange={(e) => setForm({ ...form, label: e.target.value })}
+                    placeholder="บ้าน"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="recipientName">ชื่อผู้รับ *</Label>
+                    <Input
+                      id="recipientName"
+                      value={form.recipientName}
+                      onChange={(e) => setForm({ ...form, recipientName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">เบอร์โทรศัพท์ *</Label>
+                    <Input
+                      id="phone"
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="addressLine1">ที่อยู่ *</Label>
+                  <Input
+                    id="addressLine1"
+                    value={form.addressLine1}
+                    onChange={(e) => setForm({ ...form, addressLine1: e.target.value })}
+                    placeholder="บ้านเลขที่ ซอย ถนน"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="addressLine2">ที่อยู่เพิ่มเติม</Label>
+                  <Input
+                    id="addressLine2"
+                    value={form.addressLine2}
+                    onChange={(e) => setForm({ ...form, addressLine2: e.target.value })}
+                    placeholder="อาคาร ชั้น ห้อง"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="subdistrict">ตำบล/แขวง</Label>
+                    <Input
+                      id="subdistrict"
+                      value={form.subdistrict}
+                      onChange={(e) => setForm({ ...form, subdistrict: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="district">อำเภอ/เขต *</Label>
+                    <Input
+                      id="district"
+                      value={form.district}
+                      onChange={(e) => setForm({ ...form, district: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="province">จังหวัด *</Label>
+                    <Select
+                      value={form.province}
+                      onValueChange={(value) => setForm({ ...form, province: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="เลือกจังหวัด" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {THAI_PROVINCES.map((province) => (
+                          <SelectItem key={province} value={province}>
+                            {province}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="postalCode">รหัสไปรษณีย์ *</Label>
+                    <Input
+                      id="postalCode"
+                      value={form.postalCode}
+                      onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
+                      maxLength={5}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isDefault"
+                    checked={form.isDefault}
+                    onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor="isDefault" className="cursor-pointer">
+                    ตั้งเป็นที่อยู่หลัก
+                  </Label>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsFormOpen(false)}
+                    disabled={submitting}
+                  >
+                    ยกเลิก
+                  </Button>
+                  <Button type="submit" disabled={submitting}>
+                    {submitting ? "กำลังบันทึก..." : editingAddress ? "อัปเดต" : "เพิ่ม"}
+                  </Button>
+                </div>
+              </form>
             </Card>
-          ))
+          </div>
         )}
       </div>
     </div>

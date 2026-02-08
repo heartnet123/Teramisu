@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Eye, Check, X, Truck } from "lucide-react";
+import { getServerUrl } from "@/lib/server-url";
 
 type Order = {
   id: string;
@@ -39,7 +40,7 @@ export default function AdminOrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch("/api/admin/orders", {
+      const res = await fetch(`${getServerUrl()}/api/admin/orders`, {
         credentials: "include",
       });
       if (res.ok) {
@@ -59,7 +60,7 @@ export default function AdminOrdersPage() {
 
   const handleApprove = async (orderId: string) => {
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/approve`, {
+      const res = await fetch(`${getServerUrl()}/api/admin/orders/${orderId}/approve`, {
         method: "PATCH",
         credentials: "include",
       });
@@ -78,7 +79,7 @@ export default function AdminOrdersPage() {
     if (!confirm("Are you sure you want to cancel this order?")) return;
 
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/cancel`, {
+      const res = await fetch(`${getServerUrl()}/api/admin/orders/${orderId}/cancel`, {
         method: "PATCH",
         credentials: "include",
       });
@@ -255,7 +256,7 @@ function OrderDetailsModal({
   const handleUpdateShipment = async () => {
     setUpdating(true);
     try {
-      const res = await fetch(`/api/admin/orders/${order.id}/shipment`, {
+      const res = await fetch(`${getServerUrl()}/api/admin/orders/${order.id}/shipment`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

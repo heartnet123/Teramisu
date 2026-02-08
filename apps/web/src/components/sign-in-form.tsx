@@ -27,15 +27,22 @@ export default function SignInForm({
 					email: value.email,
 					password: value.password,
 				},
-				{
-					onSuccess: () => {
-						router.push("/dashboard");
-						toast.success("Sign in successful");
-					},
-					onError: (error) => {
-						toast.error(error.error.message || error.error.statusText);
-					},
+			{
+				onSuccess: async () => {
+					const session = await authClient.getSession();
+					const role = session.data?.user?.role;
+					
+					if (role === "admin") {
+						router.push("/admin");
+					} else {
+						router.push("/");
+					}
+					toast.success("Sign in successful");
 				},
+				onError: (error) => {
+					toast.error(error.error.message || error.error.statusText);
+				},
+			},
 			);
 		},
 		validators: {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, websiteSettings } from "@Teramisu/db";
 import { eq } from "drizzle-orm";
-import { auth } from "@Teramisu/auth/server";
+import { auth } from "@Teramisu/auth";
 
 export async function POST(request: NextRequest) {
   try {

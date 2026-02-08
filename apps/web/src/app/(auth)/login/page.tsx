@@ -1,13 +1,45 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SignInForm from "@/components/sign-in-form";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import Loader from "@/components/loader";
 
 export default function LoginPage() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+  const { data: session, isPending } = authClient.useSession();
+
+  useEffect(() => {
+    if (session?.user) {
+      // Redirect based on role
+      if (session.user.role === "admin") {
+        router.replace("/admin");
+      } else {
+        router.replace("/");
+      }
+    }
+  }, [session, router]);
+
+  // Show loading while checking session
+  if (isPending) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
+
+  // Don't render login form if user is authenticated
+  if (session?.user) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">

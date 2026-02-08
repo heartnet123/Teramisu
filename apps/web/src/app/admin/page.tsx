@@ -1,11 +1,20 @@
 import { requireAdmin } from "@/lib/admin-guard";
 import { Card } from "@/components/ui/card";
 import { Users, DollarSign, ShoppingCart, TrendingUp, Package } from "lucide-react";
+import { headers } from "next/headers";
 
 async function getDashboardMetrics() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/admin/metrics`, {
+    // Forward cookies to Elysia backend for authentication
+    const headersList = await headers();
+    const cookie = headersList.get("cookie") || "";
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+    const res = await fetch(`${backendUrl}/api/admin/metrics`, {
       cache: "no-store",
+      headers: {
+        cookie,
+      },
     });
     if (!res.ok) throw new Error("Failed to fetch metrics");
     return res.json();

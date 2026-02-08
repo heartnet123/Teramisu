@@ -8,6 +8,9 @@ import {
   Users,
   Settings,
   LogOut,
+  FolderTree,
+  Ticket,
+  BarChart3,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -19,8 +22,11 @@ export default async function AdminLayout({
 
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "Products", href: "/admin/products", icon: Package },
+    { name: "Categories", href: "/admin/categories", icon: FolderTree },
     { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
+    { name: "Coupons", href: "/admin/coupons", icon: Ticket },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
