@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 import { useCartStore } from "../../service/store";
 import { toast } from "sonner";
+import RecommendationsSection from "../../components/recommendations-section";
 
 export default function CartPage() {
   const items = useCartStore((s) => s.items);
@@ -134,6 +135,16 @@ export default function CartPage() {
                 {syncing ? "Validating…" : "Checkout"}
               </button>
             </div>
+          </div>
+
+          <div className="mt-12">
+            <RecommendationsSection
+              title="You Might Also Like"
+              productIds={items.map((item) => item.id)}
+              type="cart"
+              maxProducts={3}
+              className="mt-8"
+            />
           </div>
         </>
       )}

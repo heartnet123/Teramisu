@@ -37,6 +37,10 @@ export const product = pgTable("product", {
   stock: integer("stock").notNull().default(0),
   image: text("image"),
   isActive: boolean("is_active").notNull().default(true),
+  wellnessGoals: text("wellness_goals").array().notNull().default([]),
+  ingredients: text("ingredients").array().notNull().default([]),
+  rating: decimal("rating", { precision: 3, scale: 2 }),
+  popularityScore: integer("popularity_score").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -130,6 +134,10 @@ export const orderItemRelations = relations(orderItem, ({ one }) => ({
  *   - stock: integer NOT NULL DEFAULT 0
  *   - image: text
  *   - isActive: boolean NOT NULL DEFAULT true
+ *   - wellnessGoals: text[] NOT NULL DEFAULT []
+ *   - ingredients: text[] NOT NULL DEFAULT []
+ *   - rating: decimal(3,2)
+ *   - popularityScore: integer NOT NULL DEFAULT 0
  *   - createdAt: timestamp NOT NULL DEFAULT now()
  *   - updatedAt: timestamp NOT NULL DEFAULT now()
  *
@@ -172,6 +180,10 @@ export const ecommerceDataDictionary = {
     stock: "integer NOT NULL DEFAULT 0",
     image: "text",
     isActive: "boolean NOT NULL DEFAULT true",
+    wellnessGoals: "text[] NOT NULL DEFAULT []",
+    ingredients: "text[] NOT NULL DEFAULT []",
+    rating: "decimal(3,2)",
+    popularityScore: "integer NOT NULL DEFAULT 0",
     createdAt: "timestamp NOT NULL DEFAULT now()",
     updatedAt: "timestamp NOT NULL DEFAULT now()",
   },

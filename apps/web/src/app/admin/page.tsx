@@ -1,20 +1,11 @@
 import { requireAdmin } from "@/lib/admin-guard";
 import { Card } from "@/components/ui/card";
-import { Users, DollarSign, ShoppingCart, TrendingUp, Package } from "lucide-react";
-import { headers } from "next/headers";
+import { Users, DollarSign, ShoppingCart, TrendingUp, Package, MousePointerClick, Target } from "lucide-react";
 
 async function getDashboardMetrics() {
   try {
-    // Forward cookies to Elysia backend for authentication
-    const headersList = await headers();
-    const cookie = headersList.get("cookie") || "";
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
-    const res = await fetch(`${backendUrl}/api/admin/metrics`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/admin/metrics`, {
       cache: "no-store",
-      headers: {
-        cookie,
-      },
     });
     if (!res.ok) throw new Error("Failed to fetch metrics");
     return res.json();
@@ -28,9 +19,31 @@ async function getDashboardMetrics() {
   }
 }
 
+async function getRecommendationMetrics() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/admin/recommendations/analytics`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("Failed to fetch recommendation metrics");
+    return res.json();
+  } catch (error) {
+    return {
+      overview: {
+        totalViews: 0,
+        totalClicks: 0,
+        totalConversions: 0,
+        ctr: 0,
+        conversionRate: 0,
+      },
+      topRecommendations: [],
+    };
+  }
+}
+
 export default async function AdminDashboard() {
   await requireAdmin();
   const metrics = await getDashboardMetrics();
+  const recMetrics = await getRecommendationMetrics();
 
   const avgRecentOrderValue =
     metrics?.recentOrders && metrics.recentOrders.length > 0
@@ -113,6 +126,54 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
+      <div>
+        <h2 className="text-2xl font-bold text-foreground mb-4">Recommendation Performance</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                <MousePointerClick className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-1">{recMetrics.overview.totalViews.toLocaleString()}</h3>
+            <p className="text-sm text-muted-foreground">Total Views</p>
+          </Card>
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                <MousePointerClick className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-1">{recMetrics.overview.totalClicks.toLocaleString()}</h3>
+            <p className="text-sm text-muted-foreground">Total Clicks</p>
+          </Card>
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+                <Target className="w-6 h-6 text-green-600" />
+              </div>
+              <span className="text-sm font-medium text-green-600">
+                {recMetrics.overview.ctr.toFixed(2)}%
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-1">CTR</h3>
+            <p className="text-sm text-muted-foreground">Click-Through Rate</p>
+          </Card>
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                <Target className="w-6 h-6 text-orange-600" />
+              </div>
+              <span className="text-sm font-medium text-orange-600">
+                {recMetrics.overview.conversionRate.toFixed(2)}%
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-1">Conv. Rate</h3>
+            <p className="text-sm text-muted-foreground">Conversion Rate</p>
+          </Card>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -166,6 +227,49 @@ export default async function AdminDashboard() {
           </div>
         </Card>
       </div>
+
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Target size={20} />
+          Top Recommended Products
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Product</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Recommended Product</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Type</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Views</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Clicks</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">CTR</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Conversions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recMetrics.topRecommendations && recMetrics.topRecommendations.length > 0 ? (
+                recMetrics.topRecommendations.map((rec: any, idx: number) => (
+                  <tr key={idx} className="border-b border-border hover:bg-muted/50 transition-colors">
+                    <td className="py-3 px-4 text-sm font-medium text-foreground">{rec.productName}</td>
+                    <td className="py-3 px-4 text-sm text-foreground">{rec.recommendedProductName}</td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground capitalize">{rec.recommendationType}</td>
+                    <td className="py-3 px-4 text-sm text-right text-foreground">{rec.viewCount.toLocaleString()}</td>
+                    <td className="py-3 px-4 text-sm text-right text-foreground">{rec.clickCount.toLocaleString()}</td>
+                    <td className="py-3 px-4 text-sm text-right font-medium text-foreground">{rec.ctr.toFixed(2)}%</td>
+                    <td className="py-3 px-4 text-sm text-right text-foreground">{rec.conversionCount.toLocaleString()}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                    No recommendation data available yet
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 }

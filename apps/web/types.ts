@@ -19,6 +19,10 @@ export interface Product {
   image: string;
   description: string;
   stock: number;
+  wellnessGoals?: string[];
+  ingredients?: string[];
+  rating?: number;
+  popularityScore?: number;
 }
 
 export interface CartItem extends Product {

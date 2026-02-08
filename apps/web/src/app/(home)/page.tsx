@@ -1,5 +1,9 @@
+"use client";
+
 import Footer from "@/components/footer";
 import Image from "next/image";
+import { authClient } from "@/lib/auth-client";
+import RecommendationsSection from "@/components/recommendations-section";
 
 type Product = {
   id: number;
@@ -42,6 +46,9 @@ function currency(n: number) {
 }
 
 export default function HomePage() {
+  const { data: session, isPending } = authClient.useSession();
+  const isLoggedIn = !!session?.user;
+
   return (
     <div className="min-h-screen flex flex-col animate-fade-in bg-background text-foreground selection:bg-accent/20 selection:text-foreground">
 
@@ -171,6 +178,18 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
+        {/* Recommended for You - Only for logged-in users */}
+        {isLoggedIn && !isPending && (
+          <section className="py-16">
+            <RecommendationsSection
+              title="Recommended for You"
+              type="personalized"
+              maxProducts={3}
+              className=""
+            />
+          </section>
+        )}
 
         {/* Methodology */}
         <section id="philosophy" className="py-16 bg-card border-t border-border">

@@ -16,6 +16,10 @@ type Product = {
   stock: number;
   image?: string;
   isActive: boolean;
+  wellnessGoals?: string[];
+  ingredients?: string[];
+  rating?: number;
+  popularityScore?: number;
 };
 
 export default function AdminProductsPage() {
@@ -226,6 +230,10 @@ function ProductForm({
     stock: product?.stock || 0,
     image: product?.image || "",
     isActive: product?.isActive ?? true,
+    wellnessGoals: product?.wellnessGoals?.join(", ") || "",
+    ingredients: product?.ingredients?.join(", ") || "",
+    rating: product?.rating || 0,
+    popularityScore: product?.popularityScore || 0,
   });
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -246,6 +254,14 @@ function ProductForm({
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
+          wellnessGoals: formData.wellnessGoals
+            ? formData.wellnessGoals.split(",").map((g) => g.trim()).filter(Boolean)
+            : [],
+          ingredients: formData.ingredients
+            ? formData.ingredients.split(",").map((i) => i.trim()).filter(Boolean)
+            : [],
+          rating: parseFloat(formData.rating.toString()) || 0,
+          popularityScore: parseFloat(formData.popularityScore.toString()) || 0,
         }),
       });
 
@@ -339,6 +355,61 @@ function ProductForm({
               value={formData.image}
               onChange={(e) => setFormData({ ...formData, image: e.target.value })}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Wellness Goals
+            </label>
+            <textarea
+              value={formData.wellnessGoals}
+              onChange={(e) => setFormData({ ...formData, wellnessGoals: e.target.value })}
+              className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+              rows={2}
+              placeholder="Enter goals separated by commas (e.g., energy, sleep, focus)"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Ingredients
+            </label>
+            <textarea
+              value={formData.ingredients}
+              onChange={(e) => setFormData({ ...formData, ingredients: e.target.value })}
+              className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+              rows={2}
+              placeholder="Enter ingredients separated by commas (e.g., vitamin C, zinc, elderberry)"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Rating
+              </label>
+              <Input
+                type="number"
+                step="0.1"
+                min="0"
+                max="5"
+                value={formData.rating}
+                onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Popularity Score
+              </label>
+              <Input
+                type="number"
+                step="1"
+                min="0"
+                value={formData.popularityScore}
+                onChange={(e) => setFormData({ ...formData, popularityScore: parseInt(e.target.value) || 0 })}
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

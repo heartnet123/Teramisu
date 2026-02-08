@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import * as React from "react";
-import { Menu, Search, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { ModeToggle } from "./mode-toggle";
+import { SearchAutocomplete } from "./search-autocomplete";
 
 function getInitials(name?: string) {
   if (!name) return "U";
@@ -41,12 +41,7 @@ export default function Navbar() {
 
           {/* Center: Search */}
           <div className="flex-1 max-w-2xl">
-            <form action="/search" className="flex items-center gap-2">
-              <Input name="q" placeholder="Search products, collections..." />
-              <Button type="submit" variant="ghost" size="sm" className="-ml-10">
-                <Search className="w-4 h-4" />
-              </Button>
-            </form>
+            <SearchAutocomplete />
           </div>
 
           {/* Right: actions + avatar */}

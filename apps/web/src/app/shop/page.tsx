@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getServerUrl } from "@/lib/server-url";
+import { ProductCard, type Product } from "@/components/product-card";
 
 /**
  * Minimal Shop page showcasing the new design tokens, glassy cards and microinteractions.
@@ -14,42 +15,8 @@ import { getServerUrl } from "@/lib/server-url";
  * - Uses Button primitives created earlier
  */
 
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  image: string;
-  description: string;
-  stock: number;
-  availability: "in" | "low" | "out";
-};
-
 const categories = ["Featured", "Chairs", "Armchairs", "Table lamp", "Ceiling Light", "Decors", "Rugs", "Cushions"];
 type SortKey = "featured" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
-
-function currency(n: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
-}
-
-/* Small ProductCard inside the page so we avoid creating more files for now */
-function ProductCard({ product }: { product: Product }) {
-  return (
-    <Link href={`/shop/${product.id}`} className="group block space-y-3 animate-fade-in">
-      <div className="aspect-[4/5] rounded-[32px] overflow-hidden bg-[#f3f3f1] relative transition-transform duration-300 group-hover:scale-[1.02]">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <div className="space-y-1 px-1">
-        <h3 className="font-semibold text-base leading-tight">{product.name}</h3>
-        <p className="text-sm font-medium text-muted-foreground">{currency(product.price)}</p>
-      </div>
-    </Link>
-  );
-}
 
 export default function ShopPage() {
   const [q, setQ] = useState("");
