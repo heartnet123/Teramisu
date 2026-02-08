@@ -93,7 +93,6 @@ export default function TrackOrderPage() {
         setNotFound(true);
       }
     } catch (error) {
-      console.error("Failed to fetch order:", error);
       setNotFound(true);
     } finally {
       setLoading(false);
