@@ -4,6 +4,7 @@ import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
 import IconCart from "./icons/cart";
 import { useCartStore } from "../service/store";
+import { MobileMenu } from "./mobile-menu";
 
 export default function Header() {
   const links = [
@@ -17,6 +18,7 @@ export default function Header() {
     <header className="fixed top-0 w-full z-50 border-b border-border bg-background/95 backdrop-blur">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
+          <MobileMenu />
           <a href="/" className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary text-primary-foreground flex items-center justify-center rounded-lg text-sm font-bold">T</div>
             <span className="font-semibold tracking-tighter text-foreground">Teramisu</span>
