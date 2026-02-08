@@ -671,6 +671,29 @@ const app = new Elysia()
 						},
 					),
 			)
+			.get(
+				"/track/:orderId",
+				async ({ params, set }) => {
+					const ord = await db.query.order.findFirst({
+						where: eq(order.id, params.orderId),
+						with: {
+							items: {
+								with: {
+									product: true,
+								},
+							},
+						},
+					});
+
+					if (!ord) {
+						set.status = 404;
+						return { error: "Order not found" };
+					}
+
+					return ord;
+				},
+				{ params: t.Object({ orderId: t.String() }) },
+			)
 			.derive(async ({ request }) => {
 				const session = await auth.api.getSession({ headers: request.headers });
 				return { session };
